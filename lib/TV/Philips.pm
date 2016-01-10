@@ -116,7 +116,7 @@ sub ambilight {
 
 sub switchoff {
     my $this = shift();
-    return $this->_request('input/key', {'key' => ''});
+    return $this->_request('input/key', {'key' => 'Standby'});
 }
 
 sub _init_channels {
