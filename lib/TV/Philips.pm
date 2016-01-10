@@ -173,7 +173,7 @@ $data = $tv->data()
 
 =head1 AUTHOR
 
-Andreas Haupt, E<lt>mail@andreas-haupt.deE<gt>
+Andreas Haupt, E<lt>github@andreas-haupt.deE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
