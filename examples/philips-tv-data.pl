@@ -3,17 +3,19 @@
 use lib "../lib";
 use TV::Philips;
 
+binmode STDOUT, ":utf8";
+
 my $TV_IP = shift();
 my $tv = TV::Philips->new($TV_IP);
 
-my $tv_data  = $tv->data();
-my $ambilight= $tv->ambilight();
-my $audio    = $tv->volume();
-my $muted    = ($tv->muted() ? '' : 'not ') . 'muted';
-my $source  = $tv->source_name($tv->source());
-my $cchannel = $tv->channel();
-my $cchannel_name = $tv->channel_name($cchannel);
-my $channels = $tv->channels();
+my $tv_data	= $tv->data();
+my $ambilight	= $tv->ambilight();
+my $audio	= $tv->volume();
+my $muted	= ($tv->muted() ? '' : 'not ') . 'muted';
+my $source	= $tv->source_name($tv->source());
+my $channel	= $tv->channel();
+my $channel_name= $tv->channel_name($channel);
+my $channels	= $tv->channels();
 
 my $ambi = join ',', grep { $ambilight->{$_} } qw(left right top buttom);
 
@@ -29,7 +31,7 @@ Menu language:		$tv_data->{'menulanguage'}
 Ambilight:		$ambi
 --------------------------------------------------------------------------------
 Current source:		$source
-Current channel:	$cchannel_name (preset: $cchannel)
+Current channel:	$channel_name (preset: $channel)
 Current audio level:	$audio ($muted)
 --------------------------------------------------------------------------------
 -------------------------------- CHANNEL LIST ----------------------------------
