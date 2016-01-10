@@ -57,20 +57,45 @@ sub unmute {
 }
 
 sub channel {
-    my $this = shift();
-    return $this->_request('channels/current');
+    my ($this, $preset, $list) = @_;
+    $this->_init_channels() unless defined $this->{'raw-channels'};
+    if ( $preset ) {
+	$list = 0 unless defined $list;
+	my $id = 0;
+	while ( ($id, my $data) = each %{$this->{'raw-channels'}} ) {
+	    last if $preset eq $data->{'preset'} && $id =~ /^$list-/;
+	}
+	return $this->_request('channels/current', {'id' => $id});
+    }
+    my $data = $this->_request('channels/current');
+    return $this->{'raw-channels'}{$data->{'id'}}{'preset'};
+}
+
+sub channel_name {
+    my ($this, $preset, $list) = @_;
+    $list = 0 unless defined $list;
+    $this->_init_channels() unless defined $this->{'raw-channels'};
+
+    return $this->{'channels'}{$list}{$preset};
 }
 
 sub channels {
-    my $this = shift();
-    $this->{'channels'} = $this->_request('channels')
-	unless defined $this->{'channels'};
-    return $this->_request('channels');
+    my ($this, $list) = @_;
+    $list = 0 unless defined $list;
+    $this->_init_channels() unless defined $this->{'raw-channels'};
+
+    return $this->{'channels'}{$list};
 }
 
 sub source {
     my ($this, $new_source) = @_;
-    return $this->_request('sources/current');
+    return $this->_request('sources/current')->{'id'};
+}
+
+sub source_name {
+    my ($this, $source) = @_;
+    my $data = $this->_request('sources');
+    return $data->{$source}{'name'};
 }
 
 sub sources {
@@ -92,6 +117,16 @@ sub ambilight {
 sub switchoff {
     my $this = shift();
     return $this->_request('input/key', {'key' => ''});
+}
+
+sub _init_channels {
+    my $this = shift;
+    $this->{'raw-channels'} = $this->_request('channels');
+
+    foreach my $id ( keys %{$this->{'raw-channels'}} ) {
+	$id =~ /^(\d)-/;
+	$this->{'channels'}{$1}{$this->{'raw-channels'}{$id}{'preset'}} = $this->{'raw-channels'}{$id}{'name'};
+    }
 }
 
 sub _request {
@@ -124,12 +159,17 @@ TV::Philips - Perl extension for interacting with Philips Smart-TV
 
   use TV::Philips;
   
-  my $tv = TV::Philips->new($tv_ip);
-  my $tvdata = $tv->data();
+  $tv = TV::Philips->new('name_or_ip_of_tv');
+  $tvdata = $tv->data();
 
 =head1 DESCRIPTION
 
 Interact with Philips Smart-TV
+
+=head1 METHODS
+
+$data = $tv->data()
+  Returns a hash containing general data about the tv.
 
 =head1 AUTHOR
 
