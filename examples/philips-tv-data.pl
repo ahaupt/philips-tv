@@ -1,23 +1,26 @@
 #!/usr/bin/perl
 
-use HTTP::Request;
-use LWP::UserAgent;
-use JSON;
+use lib "../lib";
+use TV::Philips;
 
-#use encoding ':locale';
+use Dumpvalue;
+my $d = new Dumpvalue();
 
 my $TV_IP = shift();
 
-my $tv_data  = tv_request('system');
-my $ambilight= tv_request('ambilight/topology');
-my $audio    = tv_request('audio/volume');
-my $csource  = tv_request('sources/current');
-my $sources  = tv_request('sources');
-my $cchannel = tv_request('channels/current');
-my $channels = tv_request('channels');
+my $tv = TV::Philips->new($TV_IP);
+
+my $tv_data  = $tv->data();
+my $ambilight= $tv->ambilight();
+my $audio    = $tv->volume();
+my $muted    = ($tv->muted() ? '' : 'not ') . 'muted';
+my $csource  = $tv->source();
+my $sources  = $tv->sources();
+my $cchannel = $tv->current_channel();
+$d->dumpValue($cchannel);
+my $channels = $tv->channels();
 
 my $ambi = join ',', grep { $ambilight->{$_} } qw(left right top buttom);
-my $muted = ($audio->{'muted'} ? '' : 'not ') . 'muted';
 
 print<<"EOF";
 $0 - show Philips TV data
@@ -32,7 +35,7 @@ Ambilight:		$ambi
 --------------------------------------------------------------------------------
 Current source:		$sources->{$csource->{'id'}}{'name'}
 Current channel:	$channels->{$cchannel->{'id'}}{'name'} (preset: $channels->{$cchannel->{'id'}}{'preset'})
-Current audio level:	$audio->{'current'} ($muted)
+Current audio level:	$audio ($muted)
 --------------------------------------------------------------------------------
 -------------------------------- CHANNEL LIST ----------------------------------
 EOF
@@ -43,18 +46,3 @@ foreach my $id ( sort { $channels->{$a}{'preset'} <=> $channels->{$b}{'preset'} 
    print "\n" unless ++$i % 3;
 }
 print "\n";
-
-sub tv_request {
-    my ($service, $data) = @_;
-    my $type = $data ? 'POST' : 'GET';
-
-    my $request = HTTP::Request->new($type => "http://$TV_IP:1925/1/$service");
-    if ( $type eq 'POST' ) {
-	$request->content_type('application/json');
-	$request->content(encode_json($data));
-    }
-    my $ua = LWP::UserAgent->new();
-    my $response = $ua->request($request);
-    die $response->status_line() unless $response->is_success();
-    return $data ? 0 : from_json($response->content());
-}

@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/TV-Philips.t
+lib/TV/Philips.pm
