@@ -9,7 +9,7 @@ my $TV_IP = shift();
 my $tv = TV::Philips->new($TV_IP);
 
 my $tv_data	= $tv->data();
-my $ambilight	= $tv->ambilight();
+my $ambilight	= $tv->ambilight_topology();
 my $audio	= $tv->volume();
 my $muted	= ($tv->muted() ? '' : 'not ') . 'muted';
 my $source	= $tv->source_name($tv->source());

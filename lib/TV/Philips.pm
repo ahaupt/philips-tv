@@ -103,7 +103,7 @@ sub sources {
     return $this->_request('sources');
 }
 
-sub ambilight {
+sub ambilight_topology {
     my $this = shift();
     my $data = $this->_request('ambilight/topology');
     return {
@@ -112,6 +112,23 @@ sub ambilight {
 	'top'	=> $data->{'top'} > 0 || 0,
 	'bottom'=> $data->{'bottom'} > 0 || 0
     };
+}
+
+sub ambilight_cached {
+    my ($this, $setting) = @_;
+    return $this->_request('ambilight/cached')
+	unless defined $setting;
+
+    $this->_request('ambilight/mode', {'current' => 'manual'});
+    return $this->_request('ambilight/cached', {'layer1' => $setting});
+}
+
+sub ambilight_mode {
+    my ($this, $mode) = @_;
+    return $this->_request('ambilight/mode')
+	unless defined $mode;
+
+    return $this->_request('ambilight/mode', {'current' => $mode});
 }
 
 sub switchoff {
@@ -170,6 +187,24 @@ Interact with Philips Smart-TV
 
 $data = $tv->data()
   Returns a hash containing general data about the tv.
+
+$volume = $tv->volume()
+  Get the currently set volume
+
+$tv->volume([+-]volume)
+  Set the volume
+
+$tv->mute()
+  Mutes the tv
+
+$tv->unmute()
+  Unmutes the tv
+
+$muted = $tv->muted()
+  Returns a true value if tv is currently muted, otherwise false
+
+$tv->switchoff()
+  Switch off tv
 
 =head1 AUTHOR
 
